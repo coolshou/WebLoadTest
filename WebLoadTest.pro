@@ -87,6 +87,8 @@ win32 {
 
     DIST_DIRECTORY =  $$shell_quote($$shell_path($${PWD}/$${TARGET}_$${QT_ARCH}))
     DIST_FILE = $$shell_quote($$shell_path($$DIST_DIRECTORY/$${TARGET}.exe))
+    webloadata.commands = \
+        $$sprintf($$QMAKE_MKDIR_CMD, $$DIST_DIRECTORY) $$escape_expand(\\n\\t)
     CONFIG(release, debug|release) {
         release: webloadbin.commands = \
             $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Release/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
@@ -94,7 +96,7 @@ win32 {
         debug: webloadbin.commands = \
             $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Debug/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
     }
-    first.depends = $(first) webloadbin
-    QMAKE_EXTRA_TARGETS += first webloadbin
+    first.depends = $(first) webloadata webloadbin
+    QMAKE_EXTRA_TARGETS += first webloadata webloadbin
 
 }
