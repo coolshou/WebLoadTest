@@ -33,7 +33,7 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "${APPVERSION}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "Web load test"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "${APPDOMAIN}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" "${APPNAME} is a trademark of ${APPDOMAIN}"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "(C)2023-2025 ${APPDOMAIN}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "(C)2025 ${APPDOMAIN}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "${APPNAME}"
 ;VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${APPFileVersion}"
 
@@ -206,6 +206,7 @@ Section "webloadtest" Section1
 	File "WebLoadTest_x86_64\translations\qtwebengine_locales\vi.pak"
 	File "WebLoadTest_x86_64\translations\qtwebengine_locales\zh-CN.pak"
 	File "WebLoadTest_x86_64\translations\qtwebengine_locales\zh-TW.pak"
+
 	CreateShortCut "$DESKTOP\webloadtest.lnk" "$INSTDIR\WebLoadTest.exe"
 	CreateDirectory "$SMPROGRAMS\webloadtest"
 	CreateShortCut "$SMPROGRAMS\webloadtest\webloadtest.lnk" "$INSTDIR\WebLoadTest.exe"
