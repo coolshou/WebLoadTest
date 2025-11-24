@@ -4,6 +4,7 @@
 !define APPNAME "webloadtest"
 !define APPNAMEANDVERSION "${APPNAME} ${APPVERSION}"
 !define APPDOMAIN "coolshou.idv.tw"
+!define APPFileVersion ${APPVERSION}.2511.24
 
 ; Main Install settings
 Name "${APPNAMEANDVERSION}"
@@ -29,7 +30,7 @@ OutFile "..\${APPNAME}-setup-${APPVERSION}.exe"
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_RESERVEFILE_LANGDLL
 
-VIProductVersion ${APPVERSION}
+VIProductVersion ${APPFileVersion}
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "${APPNAME}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "${APPVERSION}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "Web load test"
