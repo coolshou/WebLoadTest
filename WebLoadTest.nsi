@@ -38,7 +38,7 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "${APPDOMAIN}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" "${APPNAME} is a trademark of ${APPDOMAIN}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "(C)2025 ${APPDOMAIN}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "${APPNAME}"
-;VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${APPFileVersion}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${APPFileVersion}"
 
 Section "webloadtest" Section1
 
