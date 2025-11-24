@@ -3,6 +3,7 @@
 ; Define your application name
 !define APPNAME "webloadtest"
 !define APPNAMEANDVERSION "${APPNAME} ${APPVERSION}"
+!define APPDOMAIN "coolshou.idv.tw"
 
 ; Main Install settings
 Name "${APPNAMEANDVERSION}"
@@ -14,6 +15,7 @@ OutFile "..\${APPNAME}-setup-${APPVERSION}.exe"
 !include "MUI.nsh"
 
 !define MUI_ABORTWARNING
+!define MUI_ICON "images\webload.ico"
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_INSTFILES
@@ -25,6 +27,15 @@ OutFile "..\${APPNAME}-setup-${APPVERSION}.exe"
 ; Set languages (first is default language)
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_RESERVEFILE_LANGDLL
+
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "${APPNAME}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "${APPVERSION}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "Web load test"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "${APPDOMAIN}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" "${APPNAME} is a trademark of ${APPDOMAIN}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "(C)2023-2025 ${APPDOMAIN}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "${APPNAME}"
+;VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${APPFileVersion}"
 
 Section "webloadtest" Section1
 
@@ -400,5 +411,19 @@ Section Uninstall
 	RMDir "$INSTDIR\"
 
 SectionEnd
+
+Function .onInit
+# TODO: Silent mode/ Full mode
+    ${If} ${RunningX64}
+    !ifdef WIN64
+            SetRegView 64
+    !endif
+    ${Else}
+    !ifdef WIN64
+            MessageBox MB_OK|MB_ICONSTOP 'This is the 64 bit ${APPNAME} installer$\r$\nClick Ok to quit Setup.' /SD IDOK
+            Quit
+    !endif
+    ${EndIf}
+FunctionEnd
 
 ; eof
