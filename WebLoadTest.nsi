@@ -44,7 +44,7 @@ Section "webloadtest" Section1
 
 	; Set Section Files and Shortcuts
 	SetOutPath "$INSTDIR\"
-	File "WebLoadTest_x86_64\images\webload.ico
+	File "WebLoadTest_x86_64\images\webload.ico"
 	File "WebLoadTest_x86_64\d3dcompiler_47.dll"
 	File "WebLoadTest_x86_64\dxcompiler.dll"
 	File "WebLoadTest_x86_64\dxil.dll"
