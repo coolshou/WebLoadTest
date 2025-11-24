@@ -21,7 +21,8 @@ HEADERS += \
     src/mainwindow.h \
     src/dlgconfig.h \
     src/dlghistory.h \
-    src/historymodel.h
+    src/historymodel.h \
+    src/versions.h
 
 FORMS += \
     src/mainwindow.ui \
@@ -46,6 +47,23 @@ unix:!android:{
     INSTALLS += DESKTOP_FILES IMAGES_FILES
 }
 
+# Define a function to extract the version
+defineReplace(extract_version) {
+    line_number = $$1
+    # Read the contents of the file into a variable
+    contents = $$cat($$PWD/src/versions.h)
+    # Split the file contents into lines
+    lines = $$split(contents, "\n")
+    # Get the specific line (line numbers are zero-based, so we subtract 1)
+    result = $$member(lines, $$line_number)
+    # Extract the version
+    version = $$replace(result, \", )
+    # Return the extracted version
+    return($$version)
+}
+VERSION = $$extract_version(8)
+message(WEBLOADTEST_VERSION: $$VERSION)
+
 win32 {
     CONFIG += windeployqt
 # windows resources
@@ -67,8 +85,16 @@ win32 {
 
     DISTFILES += $$PWD/images/webload.ico
 
-    DIST_DIRECTORY =  $$shell_quote($$shell_path($${PWD}/../$${TARGET}_$${QT_ARCH}))
-
+    DIST_DIRECTORY =  $$shell_quote($$shell_path($${PWD}/$${TARGET}_$${QT_ARCH}))
     DIST_FILE = $$shell_quote($$shell_path($$DIST_DIRECTORY/$${TARGET}.exe))
+    CONFIG(release, debug|release) {
+        release: webloadbin.commands = \
+            $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Release/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
+    } else {
+        debug: webloadbin.commands = \
+            $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Debug/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
+    }
+    first.depends = $(first) webloadbin
+    QMAKE_EXTRA_TARGETS += first webloadbin
 
 }
