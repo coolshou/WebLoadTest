@@ -18,6 +18,13 @@ MainWindow::MainWindow(QWidget *parent)
     mDlgHistory = new DlgHistory();
     mHistoryModel = new HistoryModel();
     mDlgHistory->setDataModel(mHistoryModel);
+    // mDlgHistory->addData(0,5); //test
+    /* test data
+    QVector<double> keys, values;
+    keys   << 1 << 2 << 3 << 4 << 5;
+    values << 5 << 7 << 3 << 9 << 6;
+    mDlgHistory->addDatas(keys, values);
+    */
 
     QString settingfilename = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)
                               + QDir::separator() + "webload.ini";
@@ -43,11 +50,17 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionClearCatch, &QAction::triggered, this, &MainWindow::onClearCatchClick);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::onAboutClick);
     connect(this, &MainWindow::addHistoryEntry, mHistoryModel, &HistoryModel::addEntry);
+    connect(this, &MainWindow::addBarChartData, mDlgHistory, &DlgHistory::addData);
+    connect(this, &MainWindow::addErrorBarData, mDlgHistory, &DlgHistory::addErrorData);
+    connect(this, &MainWindow::sigClose, mDlgHistory, &DlgHistory::close);
+    connect(this, &MainWindow::sigClose, mDlgConfig, &DlgConfig::close);
+
 }
 
 MainWindow::~MainWindow()
 {
-    saveSetting();
+    delete customPage;
+    delete mWeb;
     delete ui;
 }
 
@@ -59,12 +72,13 @@ void MainWindow::startTest()
         ui->leUrl->setFocus();
         return;
     }
-    qDebug() << "initCatchSize:" << initCatchSize;
+    // qDebug() << "initCatchSize:" << initCatchSize;
     if (bClearCatch){
         clearCatch();
         int cachesize = getFolderSize(cachePath);
         if (cachesize> initCatchSize){
-            qDebug()<< "have catch:" << cachesize;
+            //
+            // qDebug()<< "have catch:" << cachesize;
             // return;
         }
     }
@@ -84,10 +98,10 @@ void MainWindow::clearCatch()
 {
     profile->clearHttpCache();
     // how to known catch is cleared??
-    QTimer::singleShot(1000, this, [this](){
-        initCatchSize = getFolderSize(cachePath);
-        qDebug() << "clearCatch cachePath: " << cachePath << " size:" << initCatchSize;
-    });
+    // QTimer::singleShot(1000, this, [this](){
+    //     initCatchSize = getFolderSize(cachePath);
+    //     qDebug() << "clearCatch cachePath: " << cachePath << " size:" << initCatchSize;
+    // });
 
 }
 
@@ -112,6 +126,13 @@ void MainWindow::saveSetting()
 
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event)
+    saveSetting();
+    emit sigClose();
+}
+
 void MainWindow::onLoadProgress(int progress)
 {
     ui->progressBar->setValue(progress);
@@ -132,19 +153,23 @@ void MainWindow::onLoadFinished(bool ok)
     ui->pbLoad->setText("Load");
     ui->pbLoad->setChecked(false);
     qint64 elapsed_ms = timer->elapsed();
-    QString elapsed = QString::number(elapsed_ms/1000.0, 'f', 3);
+    double elapsed_val= elapsed_ms/1000.0;
+    QString elapsed = QString::number(elapsed_val, 'f', 3);
     QString status="";
     if (ok){
         status = "OK";
+        emit addBarChartData(mStartTime.toSecsSinceEpoch(), elapsed_val);
     }else {
         status = "ERROR";
+        //TODO: show to get error string of web?
+        qDebug() << "load error: title:" << customPage->title();
+        emit addErrorBarData(mStartTime.toSecsSinceEpoch(), 60);
     }
     emit addHistoryEntry(mStartTime.toString("yyyy-MM-dd HH:mm:ss.zzz"),
                          mWeb->url().toString(), elapsed, status);
 
     updateStatus("Elapsed time(sec):" + elapsed);
     if (loadtimes < maxTime){
-        qDebug() << "next web load test";
         startTest();
     }
 }
@@ -159,7 +184,9 @@ void MainWindow::onLoadClick(bool checked)
     if (checked){
         loadtimes = 0;
         maxTime = ui->sbMaxTimes->value();
-
+        if (mDlgHistory){
+            mDlgHistory->setStartTime(mStartTime.toMSecsSinceEpoch()/1000.0);
+        }
         startTest();
     }else{
         maxTime = 0;

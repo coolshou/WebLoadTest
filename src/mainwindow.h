@@ -33,8 +33,14 @@ public:
     void loadSetting();
     void saveSetting();
 signals:
-    void addHistoryEntry(const QString &dateTime, const QString &url, const QString &loadSec, const QString &status);
-
+    void sigClose();
+    void addHistoryEntry(const QString &dateTime, const QString &url,
+                         const QString &loadSec, const QString &status,
+                         const QString &comment="");
+    void addBarChartData(double x, double y);
+    void addErrorBarData(double x, double y);
+protected:
+    void closeEvent(QCloseEvent *event)override;
 private slots:
     void onLoadProgress(int progress);
     void onLoadStarted();

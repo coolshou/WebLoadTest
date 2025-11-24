@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>History</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../WebLoad.qrc">
@@ -36,6 +36,9 @@
       <property name="selectionBehavior">
        <enum>QAbstractItemView::SelectRows</enum>
       </property>
+      <attribute name="horizontalHeaderStretchLastSection">
+       <bool>true</bool>
+      </attribute>
      </widget>
      <widget class="QWidget" name="widget_2" native="true">
       <property name="minimumSize">
