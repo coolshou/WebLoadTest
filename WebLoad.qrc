@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="webload">images/webload.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,28 @@
+#ifndef DLGCONFIG_H
+#define DLGCONFIG_H
+
+#include <QDialog>
+
+namespace Ui {
+class DlgConfig;
+}
+
+class DlgConfig : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit DlgConfig(QWidget *parent = nullptr);
+    ~DlgConfig();
+    void setClearCatch(bool checked);
+signals:
+    void sigClearCatch(bool checked);
+protected:
+    void changeEvent(QEvent *e);
+private slots:
+    void onAccepted();
+private:
+    Ui::DlgConfig *ui;
+};
+
+#endif // DLGCONFIG_H

@@ -1,0 +1,16 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Name=WebLoadTest
+Comment=Web load test tool
+Type=Application
+Exec=/opt/WebLoadTest/bin/WebLoadTest
+Icon=webload
+Terminal=false
+StartupNotify=true
+Categories=Application;Network;
+;MimeType=image/gif;image/png;image/jpg;
+;Keywords=;
+
+;Type=Link
+;URL=/usr/share/applications/WebLoadTest.desktop
