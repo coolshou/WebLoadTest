@@ -96,6 +96,7 @@ void MainWindow::loadSetting()
     mSetting->beginGroup("main");
     bClearCatch = mSetting->value("ClearCatch", true).toBool();
     ui->sbMaxTimes->setValue(mSetting->value("MaxTimes", 1).toInt());
+    ui->leUrl->setText(mSetting->value("Url", "https://doc.qt.io/").toString());
     mSetting->endGroup();
 }
 
@@ -104,6 +105,7 @@ void MainWindow::saveSetting()
     mSetting->beginGroup("main");
     mSetting->setValue("ClearCatch", bClearCatch);
     mSetting->setValue("MaxTimes", ui->sbMaxTimes->value());
+    mSetting->setValue("Url", ui->leUrl->text());
     mSetting->endGroup();
 
     mSetting->sync();

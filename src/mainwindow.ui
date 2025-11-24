@@ -14,7 +14,7 @@
    <string>WebLoad</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="WebLoad.qrc">
+   <iconset resource="../WebLoad.qrc">
     <normaloff>:/webload</normaloff>:/webload</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -137,7 +137,7 @@
   </action>
  </widget>
  <resources>
-  <include location="WebLoad.qrc"/>
+  <include location="../WebLoad.qrc"/>
  </resources>
  <connections/>
 </ui>
