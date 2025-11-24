@@ -44,6 +44,7 @@ Section "webloadtest" Section1
 
 	; Set Section Files and Shortcuts
 	SetOutPath "$INSTDIR\"
+	File "WebLoadTest_x86_64\images\webload.ico
 	File "WebLoadTest_x86_64\d3dcompiler_47.dll"
 	File "WebLoadTest_x86_64\dxcompiler.dll"
 	File "WebLoadTest_x86_64\dxil.dll"
@@ -218,6 +219,9 @@ Section -FinishSection
 
 	WriteRegStr HKLM "Software\${APPNAME}" "" "$INSTDIR"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayName" "${APPNAME}"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayIcon" "$INSTDIR\webload.ico"
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "NoModify" "1"
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "NoRepair" "1"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "UninstallString" "$INSTDIR\uninstall.exe"
 	WriteUninstaller "$INSTDIR\uninstall.exe"
 
