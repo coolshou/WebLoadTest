@@ -29,6 +29,7 @@ OutFile "..\${APPNAME}-setup-${APPVERSION}.exe"
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_RESERVEFILE_LANGDLL
 
+VIProductVersion ${APPVERSION}
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "${APPNAME}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "${APPVERSION}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "Web load test"
