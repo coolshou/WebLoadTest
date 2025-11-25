@@ -4,7 +4,7 @@
 !define APPNAME "webloadtest"
 !define APPNAMEANDVERSION "${APPNAME} ${APPVERSION}"
 !define APPDOMAIN "coolshou.idv.tw"
-!define APPFileVersion ${APPVERSION}.2511.24
+!define APPFileVersion ${APPVERSION}.2511.25
 
 ; Main Install settings
 Name "${APPNAMEANDVERSION}"
