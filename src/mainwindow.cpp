@@ -80,7 +80,8 @@ void MainWindow::startTest()
         url = mRandomLinkUrl;
         //only use RandomLinkUrl once
         setRandomLinkUrl("");
-        qDebug() << "url:" << url;
+        qDebug() << "mCurrentLinks:" << QString::number(mCurrentLinks)
+                 << " url:" << url;
     }
     if (url.isEmpty()){
         url = ui->leUrl->text();
@@ -104,7 +105,8 @@ void MainWindow::startTest()
     // delay 1 sec for catch cleanup? after 6.7 should use signal clearHttpCacheCompleted()
     timeouttimer->start(loadTimeout*1000);
     QTimer::singleShot(1000, this, [this, url](){
-        mWeb->load(QUrl(url));
+        // mWeb->load(QUrl(url));
+        mWeb->setUrl(QUrl(url));
     });
 }
 
