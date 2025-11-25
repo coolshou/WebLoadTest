@@ -2,6 +2,8 @@
 #define DLGHISTORY_H
 
 #include <QDialog>
+#include <QMenu>
+#include <QAction>
 #include "src/historymodel.h"
 #include "lib/qcustomplot.h"
 
@@ -26,13 +28,18 @@ protected:
     void changeEvent(QEvent *e);
 private slots:
     void clear();
-
+    void onTableContextMenu(QPoint pos);
+    void onCopyAction(bool checked);
+private:
+    void initMenu();
 private:
     Ui::DlgHistory *ui;
     HistoryModel *mModel;
     QCustomPlot *mPlot;
     QCPBars *mBars;
     QCPBars *mBarsError;
+    QMenu *mTableMenu;
+    QAction *mCopyAction;
 };
 
 #endif // DLGHISTORY_H

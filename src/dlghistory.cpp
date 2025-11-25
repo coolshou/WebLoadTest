@@ -9,6 +9,9 @@ DlgHistory::DlgHistory(QWidget *parent)
     , ui(new Ui::DlgHistory)
 {
     ui->setupUi(this);
+    initMenu();
+    ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->tableView, &QTreeView::customContextMenuRequested, this, &DlgHistory::onTableContextMenu);
     mPlot = new QCustomPlot();
     mPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
                            QCP::iSelectLegend | QCP::iSelectPlottables);
@@ -38,6 +41,32 @@ DlgHistory::~DlgHistory()
     delete ui;
 }
 
+void DlgHistory::onTableContextMenu(QPoint pos)
+{
+    if (mModel){
+        if (mModel->rowCount()>0){
+            mCopyAction->setEnabled(true);
+        }else {
+            mCopyAction->setEnabled(false);
+        }
+    }
+    mTableMenu->popup(ui->tableView->mapToGlobal(pos));
+}
+
+void DlgHistory::onCopyAction(bool checked)
+{
+    Q_UNUSED(checked)
+    qDebug() << "TODO: onCopyAction";
+}
+
+void DlgHistory::initMenu()
+{
+    mTableMenu=new QMenu();
+    mCopyAction = new QAction("Copy(TODO)");
+    connect(mCopyAction, &QAction::triggered, this, &DlgHistory::onCopyAction);
+    mTableMenu->addAction(mCopyAction);
+}
+
 void DlgHistory::setStartTime(double starttime)
 {
     mPlot->xAxis->setRange(starttime, starttime+30);
@@ -47,6 +76,7 @@ void DlgHistory::setDataModel(HistoryModel *model)
 {
     mModel = model;
     ui->tableView->setModel(model);
+    ui->tableView->setColumnWidth(HistoryColumn::ID, 50);
     ui->tableView->setColumnWidth(HistoryColumn::DateTime, 150);
     ui->tableView->setColumnWidth(HistoryColumn::Url, 200);
 
@@ -102,6 +132,16 @@ void DlgHistory::clear()
         mModel->clear();
     }
     if (mBars){
-        mBars->data().clear();
+        QCPBarsDataContainer* dataContainer =mBars->data().data();
+        if (dataContainer){
+            dataContainer->clear();
+        }
     }
+    if (mBarsError){
+        QCPBarsDataContainer* errordataContainer = mBarsError->data().data();
+        if (errordataContainer){
+            errordataContainer->clear();
+        }
+    }
+    mPlot->replot();
 }
