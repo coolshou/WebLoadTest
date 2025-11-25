@@ -9,7 +9,7 @@ QVariant HistoryModel::headerData(int section, Qt::Orientation orientation, int 
     if (role != Qt::DisplayRole || orientation != Qt::Horizontal)
         return QVariant();
     static const QStringList headers = {
-        "DateTime", "Url", "Load sec", "Status", "Comment"
+        "ID", "DateTime", "Url", "Load sec", "Status", "Comment"
     };
 
     return (section >= 0 && section < headers.size()) ? headers[section] : QVariant();
@@ -35,15 +35,14 @@ int HistoryModel::columnCount(const QModelIndex &parent) const
 QVariant HistoryModel::data(const QModelIndex &index, int role) const
 {
     if ((role == Qt::TextAlignmentRole) &&
-        ((index.column() >= HistoryColumn::LoadSec))){
+        ((index.column() >= HistoryColumn::LoadSec)||
+         (index.column() >= HistoryColumn::ID))){
         return Qt::AlignCenter;
     }
     if (!index.isValid()|| role != Qt::DisplayRole)
         return QVariant();
 
     return dataMatrix[index.row()][index.column()];
-    // FIXME: Implement me!
-    // return QVariant();
 }
 
 void HistoryModel::addEntry(const QString &dateTime,
@@ -51,8 +50,9 @@ void HistoryModel::addEntry(const QString &dateTime,
               const QString &loadSec,
               const QString &status,
               const QString &comment) {
-    beginInsertRows(QModelIndex(), dataMatrix.size(), dataMatrix.size());
-    dataMatrix.append({dateTime, url, loadSec, status, comment});
+    int idx = dataMatrix.size();
+    beginInsertRows(QModelIndex(), idx, idx);
+    dataMatrix.append({QString::number(idx), dateTime, url, loadSec, status, comment});
     endInsertRows();
 }
 

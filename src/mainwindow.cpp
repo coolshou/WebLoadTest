@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <qtwebenginecoreglobal.h>
 #include <QMessageBox>
+#include <QRandomGenerator>
 
 #include <QDebug>
 
@@ -13,8 +14,13 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    connect(ui->cbConutinus, &QCheckBox::toggled, this, &MainWindow::onConutinusClick);
+    // connect(ui->sbMaxTimes, &QSpinBox::valueChanged, this, &MainWindow::onValueChanged);
     mDlgConfig = new DlgConfig();
     connect(mDlgConfig, &DlgConfig::sigClearCatch, this, &MainWindow::setClearCatch);
+    connect(mDlgConfig, &DlgConfig::sigLoadTimeout, this, &MainWindow::setLoadTimeout);
+    connect(mDlgConfig, &DlgConfig::sigRandomLink, this, &MainWindow::setRandomLink);
+    connect(mDlgConfig, &DlgConfig::sigMaxLinks, this, &MainWindow::setMaxLinks);
     mDlgHistory = new DlgHistory();
     mHistoryModel = new HistoryModel();
     mDlgHistory->setDataModel(mHistoryModel);
@@ -46,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mWeb, &QWebEngineView::renderProcessTerminated, this, &MainWindow::onRenderProcessTerminated);
     connect(ui->pbLoad, &QPushButton::clicked, this, &MainWindow::onLoadClick);
     connect(ui->pbHistory, &QPushButton::clicked, this, &MainWindow::onHistoryClick);
+    connect(ui->pbStop, &QPushButton::clicked, this, &MainWindow::onStopClick);
     connect(ui->actionConfig, &QAction::triggered, this, &MainWindow::onConfigClick);
     connect(ui->actionClearCatch, &QAction::triggered, this, &MainWindow::onClearCatchClick);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::onAboutClick);
@@ -54,7 +61,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, &MainWindow::addErrorBarData, mDlgHistory, &DlgHistory::addErrorData);
     connect(this, &MainWindow::sigClose, mDlgHistory, &DlgHistory::close);
     connect(this, &MainWindow::sigClose, mDlgConfig, &DlgConfig::close);
-
+    timeouttimer= new QTimer();
+    connect(timeouttimer, &QTimer::timeout, this, &MainWindow::onLoadTimeout);
 }
 
 MainWindow::~MainWindow()
@@ -67,23 +75,34 @@ MainWindow::~MainWindow()
 void MainWindow::startTest()
 {
     // TODO: random url?
-    QString url = ui->leUrl->text();
-    if (url.isEmpty()){
-        ui->leUrl->setFocus();
-        return;
+    QString url ="";
+    if (mCurrentLinks<=mMaxLinks){
+        url = mRandomLinkUrl;
+        //only use RandomLinkUrl once
+        setRandomLinkUrl("");
+        qDebug() << "url:" << url;
     }
+    if (url.isEmpty()){
+        url = ui->leUrl->text();
+        mCurrentLinks = 0;
+        if (url.isEmpty()){
+            ui->leUrl->setFocus();
+            return;
+        }
+    }
+
     // qDebug() << "initCatchSize:" << initCatchSize;
     if (bClearCatch){
         clearCatch();
         int cachesize = getFolderSize(cachePath);
         if (cachesize> initCatchSize){
             //
-            // qDebug()<< "have catch:" << cachesize;
+            // qDebug()<< "TODO: have catch:" << cachesize;
             // return;
         }
     }
-    // mWeb->load(QUrl(url));
     // delay 1 sec for catch cleanup? after 6.7 should use signal clearHttpCacheCompleted()
+    timeouttimer->start(loadTimeout*1000);
     QTimer::singleShot(1000, this, [this, url](){
         mWeb->load(QUrl(url));
     });
@@ -97,20 +116,20 @@ void MainWindow::updateStatus(QString msg, int showsec)
 void MainWindow::clearCatch()
 {
     profile->clearHttpCache();
-    // how to known catch is cleared??
-    // QTimer::singleShot(1000, this, [this](){
-    //     initCatchSize = getFolderSize(cachePath);
-    //     qDebug() << "clearCatch cachePath: " << cachePath << " size:" << initCatchSize;
-    // });
-
 }
 
 void MainWindow::loadSetting()
 {
     mSetting->beginGroup("main");
     bClearCatch = mSetting->value("ClearCatch", true).toBool();
-    ui->sbMaxTimes->setValue(mSetting->value("MaxTimes", 1).toInt());
+    maxTime = mSetting->value("MaxTimes", 1).toInt();
+    ui->sbMaxTimes->setValue(maxTime);
     ui->leUrl->setText(mSetting->value("Url", "https://doc.qt.io/").toString());
+    loadTimeout = mSetting->value("loadTimeout", 30).toInt();
+    mConutinus =  mSetting->value("loadConutinus", false).toBool();
+    ui->cbConutinus->setChecked(mConutinus);
+    mRandomLink =  mSetting->value("loadRandomLink", false).toBool();
+    mMaxLinks =  mSetting->value("MaxLinks", 1).toInt();
     mSetting->endGroup();
 }
 
@@ -120,6 +139,10 @@ void MainWindow::saveSetting()
     mSetting->setValue("ClearCatch", bClearCatch);
     mSetting->setValue("MaxTimes", ui->sbMaxTimes->value());
     mSetting->setValue("Url", ui->leUrl->text());
+    mSetting->setValue("loadTimeout", loadTimeout);
+    mSetting->setValue("loadConutinus", mConutinus);
+    mSetting->setValue("loadRandomLink", mRandomLink);
+    mSetting->setValue("MaxLinks", mMaxLinks);
     mSetting->endGroup();
 
     mSetting->sync();
@@ -144,21 +167,35 @@ void MainWindow::onLoadStarted()
     qint64 ms =  QDateTime::currentMSecsSinceEpoch();
     mStartTime = QDateTime::fromMSecsSinceEpoch(ms);
     timer->start();
-    ui->pbLoad->setText("Stop");
+    updateStartBtn(false);
 }
 
 void MainWindow::onLoadFinished(bool ok)
 {
     loadtimes++;
-    ui->pbLoad->setText("Load");
-    ui->pbLoad->setChecked(false);
+    updateStartBtn(true);
     qint64 elapsed_ms = timer->elapsed();
     double elapsed_val= elapsed_ms/1000.0;
     QString elapsed = QString::number(elapsed_val, 'f', 3);
     QString status="";
     if (ok){
+        // customPage->
         status = "OK";
         emit addBarChartData(mStartTime.toSecsSinceEpoch(), elapsed_val);
+        if (mRandomLink){
+            QString script = "Array.from(document.querySelectorAll('a')).map(a => a.href).join('\\n')";
+            mWeb->page()->runJavaScript(script, [this](const QVariant& result) {
+                if (result.isValid()) {
+                    QString linkUrls = result.toString();
+                    // Convert the single string into a list of separate links
+                    QStringList linksList = linkUrls.split('\n', Qt::SkipEmptyParts);
+                    QString link = this->getRandomLink(linksList);
+                    this->setRandomLinkUrl(link);
+                }else{
+                    qWarning() << "runJavaScript returned an invalid result.";
+                }
+            });
+        }
     }else {
         status = "ERROR";
         //TODO: show to get error string of web?
@@ -168,10 +205,24 @@ void MainWindow::onLoadFinished(bool ok)
     emit addHistoryEntry(mStartTime.toString("yyyy-MM-dd HH:mm:ss.zzz"),
                          mWeb->url().toString(), elapsed, status);
 
-    updateStatus("Elapsed time(sec):" + elapsed);
-    if (loadtimes < maxTime){
+    updateStatus(QString("(%1/%2)Elapsed time(sec): %3").arg(QString::number(loadtimes),
+                                                             QString::number(maxTime),
+                                                             elapsed));
+    if (((loadtimes < maxTime)|mConutinus) & !mStop){
         startTest();
     }
+}
+
+void MainWindow::onLoadTimeout()
+{
+    emit addHistoryEntry(mStartTime.toString("yyyy-MM-dd HH:mm:ss.zzz"),
+                         mWeb->url().toString(),
+                         QString::number(loadTimeout), "TIMEOUT");
+    emit addErrorBarData(mStartTime.toSecsSinceEpoch(), 60);
+    QString url = mWeb->url().toString();
+    QTimer::singleShot(1000, this, [this, url](){
+        mWeb->load(QUrl(url));
+    });
 }
 
 void MainWindow::onRenderProcessTerminated(QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode)
@@ -181,16 +232,16 @@ void MainWindow::onRenderProcessTerminated(QWebEnginePage::RenderProcessTerminat
 
 void MainWindow::onLoadClick(bool checked)
 {
-    if (checked){
-        loadtimes = 0;
-        maxTime = ui->sbMaxTimes->value();
-        if (mDlgHistory){
-            mDlgHistory->setStartTime(mStartTime.toMSecsSinceEpoch()/1000.0);
-        }
-        startTest();
-    }else{
-        maxTime = 0;
+    Q_UNUSED(checked)
+    loadtimes = 0;
+    mCurrentLinks = 0;
+    maxTime = ui->sbMaxTimes->value();
+    if (mDlgHistory){
+        mDlgHistory->setStartTime(mStartTime.toMSecsSinceEpoch()/1000.0);
     }
+    ui->pbStop->setEnabled(true);
+    startTest();
+
 }
 
 void MainWindow::onHistoryClick(bool checked)
@@ -199,6 +250,21 @@ void MainWindow::onHistoryClick(bool checked)
     if (mDlgHistory){
         mDlgHistory->exec();
     }
+}
+
+void MainWindow::onStopClick(bool checked)
+{
+    Q_UNUSED(checked)
+    mStop = true;
+    mWeb->stop();
+    if (timeouttimer->isActive()){
+        timeouttimer->stop();
+    }
+}
+void MainWindow::onConutinusClick(bool checked)
+{
+    ui->wTimes->setEnabled(!checked);
+    mConutinus = checked;
 }
 
 void MainWindow::onClearCatchClick(bool checked)
@@ -222,11 +288,28 @@ void MainWindow::setClearCatch(bool checked)
     bClearCatch = checked;
 }
 
+void MainWindow::setLoadTimeout(int timeout)
+{
+    loadTimeout = timeout;
+}
+
+void MainWindow::setRandomLink(bool random)
+{
+    mRandomLink = random;
+}
+
+void MainWindow::setMaxLinks(int value)
+{
+    mMaxLinks = value;
+}
+
 void MainWindow::onConfigClick(bool checked)
 {
     Q_UNUSED(checked)
     if (mDlgConfig){
         mDlgConfig->setClearCatch(bClearCatch);
+        mDlgConfig->setRandomLink(mRandomLink);
+        mDlgConfig->setMaxLinks(mMaxLinks);
         mDlgConfig->show();
     }
 }
@@ -257,4 +340,36 @@ qint64 MainWindow::getFolderSize(const QString &directoryPath)
     }
 
     return totalSize;
+}
+
+void MainWindow::updateStartBtn(bool start)
+{
+    ui->pbLoad->setEnabled(start);
+    // ui->pbStop->setEnabled(!start);
+}
+
+QString MainWindow::getRandomLink(const QStringList& linksList)
+{
+    // 1. Check if the list is empty
+    if (linksList.isEmpty()) {
+        qWarning() << "Error: The list is empty.";
+        return QString(); // Return an empty string
+    }
+
+    // 2. Determine the range
+    int size = linksList.size();
+
+    // 3. Generate a random index
+    // QRandomGenerator::global()->bounded(size) generates a random integer
+    // in the range [0, size - 1].
+    int randomIndex = QRandomGenerator::global()->bounded(size);
+
+    // 4. Return the string at the random index
+    return linksList.at(randomIndex);
+}
+
+void MainWindow::setRandomLinkUrl(QString value)
+{
+    mCurrentLinks++;
+    mRandomLinkUrl = value;
 }

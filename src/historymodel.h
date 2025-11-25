@@ -6,7 +6,8 @@
 #include <QString>
 
 enum HistoryColumn {
-    DateTime = 0,
+    ID = 0,
+    DateTime,
     Url,
     LoadSec,
     Status,

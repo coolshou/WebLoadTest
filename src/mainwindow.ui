@@ -42,25 +42,63 @@
           <string>Load</string>
          </property>
          <property name="checkable">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_2">
+        <widget class="QPushButton" name="pbStop">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
-          <string>Times:</string>
+          <string>Stop</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="sbMaxTimes">
-         <property name="minimum">
-          <number>1</number>
+        <widget class="QCheckBox" name="cbConutinus">
+         <property name="text">
+          <string>Conutinus</string>
          </property>
-         <property name="maximum">
-          <number>999</number>
-         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="wTimes" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Times:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="sbMaxTimes">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
