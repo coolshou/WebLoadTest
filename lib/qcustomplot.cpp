@@ -6734,7 +6734,9 @@ QString QCPAxisTickerDateTime::getTickLabel(double tick, const QLocale &locale, 
 {
   Q_UNUSED(precision)
   Q_UNUSED(formatChar)
-# if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+# if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    return locale.toString(keyToDateTime(tick).toTimeZone(mTimeZone), mDateTimeFormat);
+# elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
   if (mDateTimeSpec == Qt::TimeZone)
     return locale.toString(keyToDateTime(tick).toTimeZone(mTimeZone), mDateTimeFormat);
   else
@@ -32125,9 +32127,9 @@ double QCPPolarAxisRadial::radiusToCoord(double radius) const
 QCPPolarAxisRadial::SelectablePart QCPPolarAxisRadial::getPartAt(const QPointF &pos) const
 {
   Q_UNUSED(pos) // TODO remove later
-  if (!mVisible)
+  if (!mVisible){
     return spNone;
-
+  }
   /*
     TODO:
   if (mAxisPainter->axisSelectionBox().contains(pos.toPoint()))
@@ -32945,9 +32947,9 @@ QCPPolarAxisAngular::SelectablePart QCPPolarAxisAngular::getPartAt(const QPointF
 {
   Q_UNUSED(pos) // TODO remove later
 
-  if (!mVisible)
+  if (!mVisible) {
     return spNone;
-
+  }
   /*
     TODO:
   if (mAxisPainter->axisSelectionBox().contains(pos.toPoint()))
