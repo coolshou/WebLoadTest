@@ -8,10 +8,9 @@
 enum HistoryColumn {
     ID = 0,
     DateTime,
-    Url,
     LoadSec,
     Status,
-    comment,
+    Url,
     COLUMN_COUNT
 };
 

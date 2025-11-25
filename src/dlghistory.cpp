@@ -78,7 +78,8 @@ void DlgHistory::setDataModel(HistoryModel *model)
     ui->tableView->setModel(model);
     ui->tableView->setColumnWidth(HistoryColumn::ID, 50);
     ui->tableView->setColumnWidth(HistoryColumn::DateTime, 150);
-    ui->tableView->setColumnWidth(HistoryColumn::Url, 200);
+    // ui->tableView->setColumnWidth(HistoryColumn::Url, 200);
+    ui->tableView->setColumnWidth(HistoryColumn::Status, 50);
 
 }
 

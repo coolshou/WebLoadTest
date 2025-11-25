@@ -41,11 +41,10 @@ MainWindow::MainWindow(QWidget *parent)
     profile = new QWebEngineProfile("webload", this);
     cachePath = profile->cachePath();
     clearCatch();
-    // qDebug() << "cachePath: " << cachePath << " size:" << getFolderSize(cachePath);
     customPage = new QWebEnginePage(profile, this);
     mWeb->setPage(customPage);
-    // connect(profile, &QWebEngineProfile::);
     ui->vlWeb->addWidget(mWeb);
+    ui->vlWeb->setStretch(1,1);
     connect(mWeb, &QWebEngineView::loadProgress, this, &MainWindow::onLoadProgress);
     connect(mWeb, &QWebEngineView::loadStarted, this, &MainWindow::onLoadStarted);
     connect(mWeb, &QWebEngineView::loadFinished, this, &MainWindow::onLoadFinished);
@@ -76,7 +75,7 @@ void MainWindow::startTest()
 {
     // TODO: random url?
     QString url ="";
-    if (mCurrentLinks<=mMaxLinks){
+    if (mRandomLink && (mCurrentLinks<=mMaxLinks)){
         url = mRandomLinkUrl;
         //only use RandomLinkUrl once
         setRandomLinkUrl("");
@@ -212,6 +211,8 @@ void MainWindow::onLoadFinished(bool ok)
                                                              elapsed));
     if (((loadtimes < maxTime)|mConutinus) & !mStop){
         startTest();
+    }else{
+        timeouttimer->stop();
     }
 }
 
@@ -221,10 +222,11 @@ void MainWindow::onLoadTimeout()
                          mWeb->url().toString(),
                          QString::number(loadTimeout), "TIMEOUT");
     emit addErrorBarData(mStartTime.toSecsSinceEpoch(), 60);
-    QString url = mWeb->url().toString();
-    QTimer::singleShot(1000, this, [this, url](){
-        mWeb->load(QUrl(url));
-    });
+    if (((loadtimes < maxTime)|mConutinus) & !mStop){
+        startTest();
+    }else{
+        timeouttimer->stop();
+    }
 }
 
 void MainWindow::onRenderProcessTerminated(QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode)
@@ -350,7 +352,7 @@ void MainWindow::updateStartBtn(bool start)
     // ui->pbStop->setEnabled(!start);
 }
 
-QString MainWindow::getRandomLink(const QStringList& linksList)
+QString MainWindow::getRandomLink(QStringList& linksList)
 {
     // 1. Check if the list is empty
     if (linksList.isEmpty()) {
@@ -366,12 +368,23 @@ QString MainWindow::getRandomLink(const QStringList& linksList)
     // in the range [0, size - 1].
     int randomIndex = QRandomGenerator::global()->bounded(size);
 
-    // 4. Return the string at the random index
-    return linksList.at(randomIndex);
+    // 4. check if url is start with http:// or https://
+    QString url = linksList.at(randomIndex);
+    if ((!url.startsWith("http://"))&&(!url.startsWith("https://"))){
+        linksList.removeAt(randomIndex);
+        size = linksList.size();
+        randomIndex = QRandomGenerator::global()->bounded(size);
+        url = linksList.at(randomIndex);
+    }
+    // 5. Return the string at the random index
+    return url;
 }
 
 void MainWindow::setRandomLinkUrl(QString value)
 {
-    mCurrentLinks++;
-    mRandomLinkUrl = value;
+    qDebug() << "setRandomLinkUrl: " << value;
+    if (!value.isEmpty()){
+        mCurrentLinks++;
+        mRandomLinkUrl = value;
+    }
 }

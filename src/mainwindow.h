@@ -32,7 +32,7 @@ public:
     void clearCatch();
     void loadSetting();
     void saveSetting();
-    QString getRandomLink(const QStringList &linksList);
+    QString getRandomLink(QStringList &linksList);
     void setRandomLinkUrl(QString value);
 signals:
     void sigClose();
