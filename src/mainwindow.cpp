@@ -7,6 +7,8 @@
 #include <QMessageBox>
 #include <QRandomGenerator>
 
+#include "versions.h"
+
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -94,7 +96,7 @@ void MainWindow::startTest()
     // qDebug() << "initCatchSize:" << initCatchSize;
     if (bClearCatch){
         clearCatch();
-        int cachesize = getFolderSize(cachePath);
+        qint64 cachesize = getFolderSize(cachePath);
         if (cachesize> initCatchSize){
             //
             // qDebug()<< "TODO: have catch:" << cachesize;
@@ -280,11 +282,12 @@ void MainWindow::onClearCatchClick(bool checked)
 void MainWindow::onAboutClick(bool checked)
 {
     Q_UNUSED(checked)
-    QString msg = QString("Chromium Version: %1\nQWebEngine Version: %2")
-                      .arg(qWebEngineChromiumVersion(),
+    QString msg = QString("%1: %2\n  Chromium Version: %3\n  QWebEngine Version: %4")
+                      .arg(WEBLOADTEST, WEBLOADTEST_VERSION,
+                           qWebEngineChromiumVersion(),
                            qWebEngineVersion());
-    QMessageBox::information(this, "About",
-                             msg);
+    msg.append("\n\nAuther: jimmy");
+    QMessageBox::information(this, "About", msg);
 }
 
 void MainWindow::setClearCatch(bool checked)

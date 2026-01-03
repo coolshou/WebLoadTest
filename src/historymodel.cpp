@@ -20,12 +20,12 @@ int HistoryModel::rowCount(const QModelIndex &parent) const
     Q_UNUSED(parent)
     // if (parent.isValid())
     //     return 0;
-    return dataMatrix.size();
+    return static_cast<int>(dataMatrix.size());
 }
 
 int HistoryModel::columnCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent);
+    Q_UNUSED(parent)
     // if (parent.isValid())
     //     return 0;
 
@@ -53,7 +53,7 @@ void HistoryModel::addEntry(const QString &dateTime,
               const QString &loadSec,
               const QString &status,
               const QString &comment) {
-    int idx = dataMatrix.size();
+    int idx = static_cast<int>(dataMatrix.size());
     beginInsertRows(QModelIndex(), idx, idx);
     dataMatrix.append({QString::number(idx), dateTime, loadSec, status, url, comment});
     endInsertRows();

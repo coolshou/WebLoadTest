@@ -71,7 +71,7 @@ private:
     QWebEngineView *mWeb;
     QWebEngineProfile *profile;
     QString cachePath;
-    int initCatchSize;
+    qint64 initCatchSize;
     QWebEnginePage *customPage;
     QElapsedTimer *timer;
     bool bClearCatch;
