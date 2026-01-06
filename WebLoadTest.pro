@@ -61,7 +61,7 @@ defineReplace(extract_version) {
     # Return the extracted version
     return($$version)
 }
-VERSION = $$extract_version(8)
+VERSION = $$extract_version(11)
 message(WEBLOADTEST_VERSION: $$VERSION)
 
 win32 {
