@@ -16,6 +16,7 @@ InstallDir "$PROGRAMFILES\webloadtest"
 InstallDirRegKey HKLM "Software\${APPNAME}" ""
 OutFile "..\${APPNAME}-setup-${APPVERSION}.exe"
 
+!include "FileFunc.nsh"
 !include "x64.nsh"
 ; Modern interface settings
 !include "MUI.nsh"
