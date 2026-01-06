@@ -4,7 +4,11 @@
 !define APPNAME "webloadtest"
 !define APPNAMEANDVERSION "${APPNAME} ${APPVERSION}"
 !define APPDOMAIN "coolshou.idv.tw"
-!define APPFileVersion ${APPVERSION}.2511.25
+!define APPURL "https://github.com/coolshou/webloadtest"
+!define APPFileVersion ${APPVERSION}.2601.06
+
+!define PRODUCT_REG_KEY "Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}"
+!define PRODUCT_UNINSTALL_EXE "${APPNAME}-uninstall.exe"
 
 ; Main Install settings
 Name "${APPNAMEANDVERSION}"
@@ -17,7 +21,7 @@ OutFile "..\${APPNAME}-setup-${APPVERSION}.exe"
 !include "MUI.nsh"
 
 !define MUI_ABORTWARNING
-!define MUI_ICON "images\webload.ico"
+!define MUI_ICON "images\webloadtest.ico"
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_INSTFILES
@@ -47,7 +51,7 @@ Section "webloadtest" Section1
 
 	; Set Section Files and Shortcuts
 	SetOutPath "$INSTDIR\"
-	File "images\webload.ico"
+	File "images\webloadtest.ico"
 	File "WebLoadTest_x86_64\d3dcompiler_47.dll"
 	File "WebLoadTest_x86_64\dxcompiler.dll"
 	File "WebLoadTest_x86_64\dxil.dll"
@@ -214,20 +218,26 @@ Section "webloadtest" Section1
 	CreateShortCut "$DESKTOP\webloadtest.lnk" "$INSTDIR\WebLoadTest.exe"
 	CreateDirectory "$SMPROGRAMS\webloadtest"
 	CreateShortCut "$SMPROGRAMS\webloadtest\webloadtest.lnk" "$INSTDIR\WebLoadTest.exe"
-	CreateShortCut "$SMPROGRAMS\webloadtest\Uninstall.lnk" "$INSTDIR\uninstall.exe"
+	CreateShortCut "$SMPROGRAMS\webloadtest\Uninstall.lnk" "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
 
 SectionEnd
 
 Section -FinishSection
 
 	WriteRegStr HKLM "Software\${APPNAME}" "" "$INSTDIR"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayName" "${APPNAME}"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayIcon" "$INSTDIR\webload.ico"
-	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "NoModify" "1"
-	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "NoRepair" "1"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "UninstallString" "$INSTDIR\uninstall.exe"
-	WriteUninstaller "$INSTDIR\uninstall.exe"
-
+    WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "DisplayName" "${APPNAME}"
+    WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "DisplayIcon" "$INSTDIR\${APPNAME}.ico"
+    WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "Publisher" "${APPDOMAIN}"
+    WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "DisplayVersion" "${APPFileVersion}"
+    WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "HelpLink" "${APPURL}"
+	WriteRegDWORD HKLM "Software\${PRODUCT_REG_KEY}" "NoModify" "1"
+	WriteRegDWORD HKLM "Software\${PRODUCT_REG_KEY}" "NoRepair" "1"
+	WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "UninstallString" "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
+	WriteUninstaller "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
+ # size
+    ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+    IntFmt $0 "0x%08X" $0
+    WriteRegDWORD HKLM "Software\${PRODUCT_REG_KEY}" "EstimatedSize" "$0"
 SectionEnd
 
 ; Modern install component descriptions
@@ -239,11 +249,11 @@ SectionEnd
 Section Uninstall
 
 	;Remove from registry...
-	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}"
+	DeleteRegKey HKLM "Software\${PRODUCT_REG_KEY}"
 	DeleteRegKey HKLM "SOFTWARE\${APPNAME}"
 
 	; Delete self
-	Delete "$INSTDIR\uninstall.exe"
+	Delete "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
 
 	; Delete Shortcuts
 	Delete "$DESKTOP\webloadtest.lnk"
@@ -251,7 +261,7 @@ Section Uninstall
 	Delete "$SMPROGRAMS\webloadtest\Uninstall.lnk"
 
 	; Clean up webloadtest
-	Delete "$INSTDIR\webload.ico"
+	Delete "$INSTDIR\webloadtest.ico"
 	Delete "$INSTDIR\d3dcompiler_47.dll"
 	Delete "$INSTDIR\dxcompiler.dll"
 	Delete "$INSTDIR\dxil.dll"
